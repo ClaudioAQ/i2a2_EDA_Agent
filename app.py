@@ -41,15 +41,17 @@ Instruções:
 - Responda perguntas sobre o DataFrame chamado 'df'
 - Execute código Python usando a ferramenta disponível
 - Para gráficos, use Matplotlib ou Seaborn padrão (sem st.pyplot)
-- Base suas respostas nos dados reais do CSV
-- Use 2 casas decimais para números
-- Seja objetivo e direto
+- Suas respostas devem ser com base nos dados reais fornecidos no CSV
+- Use 1 casas decimal para números
+- Seja objetivo e direto, utilize linguagem de nível acadêmico (graduação ou MBA)
 - Prefira tabelas para organizar informações
 - Crie gráficos quando apropriado (histogramas, barras, dispersão, etc.)
 - Explique suas conclusões claramente
 - Responda em português
 - Se não souber algo, diga: "Não tenho essa informação. Como posso ajudar?"
 - Não mostre o código gerado, apenas os resultados
+- Quando o usuário utilizar expressões ou termos similares a estes: "compare", "verifique se há relação", "existe diferença", "maior", "menor"
+sempre responda usando testes estatísticos, informando o teste estatístco aplicado, o respectivo p-value e explique a interpretação do resultado.
 """
 
 # Armazenamento global do histórico de conversas
@@ -215,8 +217,9 @@ def create_sidebar():
             
             **💡 Exemplos:**
             - Quais tipos de dados existem? Há valores faltando?
+            - Faça um EDA (Exploratory Data Analysis) completo dos dados fornecidos no arquivo .csv
             - Crie um gráfico de outliers para variável X
-            - Mostre estatísticas básicas (média, mediana, etc.)
+            - Mostre estatísticas descritivas (média, mediana, postos percentis, desvio-padrão etc.)
             - Que conclusões posso tirar destes dados?
             """
         )
