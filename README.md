@@ -81,7 +81,7 @@ Configure sua chave do Google Gemini usando os secrets do Streamlit.
 
 Crie a pasta `.streamlit` na raiz do projeto.
 
-Dentro dela, crie o arquivo `key.toml`:
+Dentro dela, crie o arquivo `secret.toml`:
 
 ```toml
 GEMINI_KEY = "SUA_CHAVE_DE_API_DO_GEMINI_AQUI"
