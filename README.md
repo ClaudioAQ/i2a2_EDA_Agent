@@ -66,10 +66,13 @@ Crie um arquivo `requirements.txt` com:
 streamlit
 pandas
 matplotlib
-langchain
 langchain-google-genai
+langchain-core
+langchain
 langchain-experimental
-tabula
+scikit-learn
+seaborn
+tabulate
 ```
 
 Instale as bibliotecas:
