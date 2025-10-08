@@ -69,6 +69,7 @@ matplotlib
 langchain
 langchain-google-genai
 langchain-experimental
+tabula
 ```
 
 Instale as bibliotecas:
