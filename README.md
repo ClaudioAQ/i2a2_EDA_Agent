@@ -105,10 +105,10 @@ O aplicativo abrirá automaticamente no navegador.
 5. Use o chat para fazer suas perguntas
 
 **Exemplos de perguntas:**
-- "Quais tipos de dados existem? Há valores ausentes?"
-- "Crie um gráfico de outliers para a variável X"
-- "Mostre estatísticas básicas (média, mediana, desvio)"
-- "Que conclusões principais posso tirar destes dados?"
+- "Faça um EDA completo do arquivo .csv"
+- "Determine os tipos de variáveis existentes e a qualidade dos dados"
+- "Faça um comparativo dos perfis de gastos (Amount) entre os fraudadores e os não-fraudadores, com visualização gráfica"
+- "Quais são as principais conclusões que posso obter analisando estes dados?"
 
 **Banco de Dados de Exemplo**
 
