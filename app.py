@@ -337,7 +337,7 @@ def main():
     """
     st.set_page_config(
         page_title="Analisador de Base de Dados no formato .CSV com IA",
-        page_icon="📊",
+        page_icon=":robot:",
         layout="wide"
     )
     
