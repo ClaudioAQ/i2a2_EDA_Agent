@@ -8,10 +8,11 @@ Este aplicativo cria um assistente inteligente para análise de dados em CSV.
 Permite upload de arquivos, consultas em linguagem natural e geração automática
 de gráficos e insights usando Google Gemini e LangChain.
 
-Autor: Carlos Antônio Campos Jorge
+Autor: Carlos Antônio Campos Jorge - Equipe Challenge Accepted
+Co-Autor: Claudio Fagundes Pereira
 Funcionalidades:
 - Interface web responsiva
-- Upload de arquivos CSV
+- Upload de qualquer tipo de arquivos CSV
 - Análise de dados com IA
 - Geração de gráficos automática
 - Histórico de conversação
@@ -34,20 +35,19 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 
 # Definição da personalidade do agente de IA
 SYSTEM_PROMPT = """
-Você é um analista de dados especialista em Python, Pandas e Matplotlib. 
-Analise os dados carregados e forneça insights detalhados.
-
-Instruções:
+Você é um analista de dados especialista na linguagem Python, com uso de bilbiotecas Pandas e Matplotlib. 
+Sua tarefa é analisar exploratoriamente os dados e verificar a existência de padrões com geração de insights.
+Analise os dados carregados de acordo com as seguintes instruções:
 - Responda perguntas sobre o DataFrame chamado 'df'
 - Execute código Python usando a ferramenta disponível
-- Para gráficos, use Matplotlib ou Seaborn padrão (sem st.pyplot)
+- Para gráficos, use Matplotlib ou Seaborn padrão (com st.pyplot)
 - Suas respostas devem ser com base nos dados reais fornecidos no CSV
-- Use 1 casas decimal para números
+- Use até 3 casas decimais para números
 - Seja objetivo e direto, utilize linguagem de nível acadêmico (graduação ou MBA)
 - Prefira tabelas para organizar informações
-- Crie gráficos quando apropriado (histogramas, barras, dispersão, etc.)
+- Crie gráficos quando apropriado (histogramas, barras, dispersão, boxplot etc.)
 - Explique suas conclusões claramente
-- Responda em português
+- Responda em português (PT-BR)
 - Se não souber algo, diga: "Não tenho essa informação. Como posso ajudar?"
 - Não mostre o código gerado, apenas os resultados
 - Quando o usuário utilizar expressões ou termos similares a estes: "compare", "verifique se há relação", "existe diferença", "maior", "menor"
@@ -81,22 +81,81 @@ def create_llm(api_key):
 
 
 @st.cache_data
-def load_data(file):
-    """
-    Carrega arquivo CSV em DataFrame com cache.
-    
-    Args:
-        file: Arquivo enviado pelo usuário
-        
-    Returns:
-        pd.DataFrame ou None: Dados carregados ou None se erro
-    """
-    try:
-        return pd.read_csv(file)
-    except Exception as error:
-        st.error(f"Erro no carregamento: {error}")
-        return None
 
+#def load_data(file):
+#    """
+#    Carrega arquivo CSV em DataFrame com cache.
+#    
+#    Args:
+#        file: Arquivo enviado pelo usuário
+#        
+#    Returns:
+#        pd.DataFrame ou None: Dados carregados ou None se erro
+#    """
+#    try:
+#        return pd.read_csv(file)
+#    except Exception as error:
+#        st.error(f"Erro no carregamento: {error}")
+#        return None
+    
+def detect_csv_separator(file_path):
+    """Detecta automaticamente o separador de um arquivo CSV"""
+    import csv
+    
+    # Lista de separadores comuns para testar
+    separators = [',', ';', '\t', '|', ':', ' ']
+    
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+        # Ler as primeiras linhas para análise
+        sample = file.read(1024)
+        file.seek(0)
+        
+        # Usar o Sniffer do CSV para detectar o separador
+        try:
+            sniffer = csv.Sniffer()
+            delimiter = sniffer.sniff(sample, delimiters=',;\t|: ').delimiter
+            return delimiter
+        except:
+            # Se o Sniffer falhar, testar manualmente
+            first_line = file.readline()
+            
+            # Contar ocorrências de cada separador
+            separator_counts = {}
+            for sep in separators:
+                separator_counts[sep] = first_line.count(sep)
+            
+            # Retornar o separador mais comum (que não seja espaço se houver outros)
+            most_common = max(separator_counts.items(), key=lambda x: x[1])
+            if most_common[1] > 0:
+                return most_common[0]
+            else:
+                return ','  # Default para vírgula
+
+def read_csv_robust(file_path):
+    """Lê um arquivo CSV de forma robusta, detectando automaticamente o separador"""
+    try:
+        # Detectar o separador
+        separator = detect_csv_separator(file_path)
+        
+        # Tentar diferentes encodings
+        encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
+        
+        for encoding in encodings:
+            try:
+                df = pd.read_csv(file_path, sep=separator, encoding=encoding)
+                # Verificar se a leitura foi bem-sucedida (mais de 1 coluna)
+                if len(df.columns) > 1:
+                    return df, separator, encoding
+            except:
+                continue
+        
+        # Se tudo falhar, tentar com parâmetros padrão
+        df = pd.read_csv(file_path)
+        return df, ',', 'utf-8'
+        
+    except Exception as e:
+        st.error(f"Erro ao ler o arquivo CSV: {str(e)}")
+        return None, None, None
 
 def get_chat_history(session_id: str):
     """
@@ -186,15 +245,15 @@ def create_sidebar():
             api_key = st.secrets["GOOGLE_API_KEY"]
             st.success("Chave API carregada!")
         except (KeyError, FileNotFoundError):
-            st.warning("Configure a chave API no arquivo .streamlit/key.toml")
+            st.warning("Configure a chave API no arquivo .streamlit/secrets.toml")
             api_key = st.text_input(
                 "Chave API Google Gemini",
                 type="password",
-                help="Configure permanentemente em .streamlit/key.toml"
+                help="Configure permanentemente em .streamlit/secrets.toml"
             )
         
         # Upload de arquivo
-        uploaded = st.file_uploader(
+        uploaded_file = st.file_uploader(
             "📁 Carregar arquivo CSV",
             type="csv"
         )
@@ -216,15 +275,14 @@ def create_sidebar():
             3. Faça suas **perguntas** no chat
             
             **💡 Exemplos:**
-            - Quais tipos de dados existem? Há valores faltando?
-            - Faça um EDA (Exploratory Data Analysis) completo dos dados fornecidos no arquivo .csv
-            - Crie um gráfico de outliers para variável X
-            - Mostre estatísticas descritivas (média, mediana, postos percentis, desvio-padrão etc.)
-            - Que conclusões posso tirar destes dados?
+            - Faça um EDA completo do arquivo .csv
+            - Determine os tipos de variáveis existentes e a qualidade dos dados
+            - Faça um comparativo dos perfis de gastos (Amount) entre os fraudadores e os não-fraudadores, com visualização gráfica
+            - Quais são as principais conclusões que posso obter analisando estes dados?
             """
         )
         
-        return api_key, uploaded
+        return api_key, uploaded_file
 
 
 def handle_chat(agent):
@@ -278,16 +336,19 @@ def main():
     Função principal do aplicativo.
     """
     st.set_page_config(
-        page_title="Analisador de CSV com IA",
+        page_title="Analisador de Base de Dados no formato .CSV com IA",
         page_icon="📊",
         layout="wide"
     )
     
-    st.title("📊 Analisador de CSV com IA")
-    st.write(
-        "**Bem-vindo!** Use inteligência artificial para analisar seus dados CSV. "
-        "Configure sua API na barra lateral e carregue seus dados para começar."
-    )
+    st.title("📊 Estagiário de IA")
+    st.subheader('App criado por Claudio Fagundes Pereira, curso Agentes de IA da I2A2')
+    st.write('')
+    st.write('**Bem-vindo!**')
+    st.write('')
+    st.write('Use inteligência artificial para analisar seus dados CSV.')
+    st.write('')
+    st.write('Configure sua API na barra lateral e carregue seus dados para começar.')
     
     # Configuração inicial
     api_key, uploaded_file = create_sidebar()
@@ -311,12 +372,12 @@ def main():
                 st.pyplot(msg.additional_kwargs["plot"])
     
     # Carrega e processa dados
-    df = load_data(uploaded_file)
+    df = pd.read_csv(uploaded_file, encoding='latin-1', sep=';', on_bad_lines='skip')
     if df is not None:
         # Mostra prévia apenas uma vez
         if not st.session_state.get('data_loaded', False):
-            st.success("✅ Dados carregados! Prévia:")
-            st.dataframe(df.head())
+            st.success("✅ Dados carregados! Prévia: 10 primeiras linhas")
+            st.dataframe(df.head(10))
             st.session_state.data_loaded = True
         
         try:
