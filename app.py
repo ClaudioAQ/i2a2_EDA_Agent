@@ -272,11 +272,11 @@ def create_sidebar():
             
             1. Insira sua **chave API** do Google Gemini na barra lateral
             2. Carregue um **arquivo CSV**
-            3. Faça suas **perguntas** no chat
+            3. Faça suas **solicitações** no chat
             
             **💡 Exemplos:**
             - Faça um EDA completo do arquivo .csv
-            - Determine os tipos de variáveis existentes e a qualidade dos dados
+            - Determine os tipos de variáveis existentes e a qualidade dos dados "missing values"
             - Faça um comparativo dos perfis de gastos (Amount) entre os fraudadores e os não-fraudadores, com visualização gráfica
             - Quais são as principais conclusões que posso obter analisando estes dados?
             """
@@ -299,7 +299,7 @@ def handle_chat(agent):
             st.markdown(user_input)
         
         with st.chat_message("assistant"):
-            with st.spinner("🔍 Analisando dados..."):
+            with st.spinner("🔍 Analisando os dados..."):
                 try:
                     # Limpa plots anteriores
                     plt.clf()
@@ -348,7 +348,7 @@ def main():
     st.write('')
     st.write('Use inteligência artificial para analisar seus dados CSV.')
     st.write('')
-    st.write('Configure sua API na barra lateral e carregue seus dados para começar.')
+    st.write('Configure sua API na barra lateral e carregue seus dados para iniciar.')
     
     # Configuração inicial
     api_key, uploaded_file = create_sidebar()
