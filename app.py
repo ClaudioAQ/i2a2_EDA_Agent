@@ -341,7 +341,7 @@ def main():
         layout="wide"
     )
     
-    st.title("📊 Estagiário de IA")
+    st.title("📊 Meu estagIArio favorito!")
     st.subheader('App criado por Claudio Fagundes Pereira, curso Agentes de IA da I2A2')
     st.write('')
     st.write('**Bem-vindo!**')
